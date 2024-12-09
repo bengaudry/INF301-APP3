@@ -20,7 +20,7 @@ tests_acte3b: acte3b
 tests_acte4: acte4
 	@set -e; for f in $$(cat tests_acte4/liste.txt); do echo Test: $$f; ./acte4 tests_acte4/$$f; done; printf "\033[0;32mSuccès\033[0m sur l'acte IV !\n"
 
-OBJS= arbres.o arbresphylo.o listes.o common_tests.o affichage.o
+OBJS= arbres.o arbresphylo.o listes.o common_tests.o affichage.o file.o
 acte1: acte1.o $(OBJS)
 acte2: acte2.o $(OBJS)
 acte3: acte3.o $(OBJS)
@@ -33,7 +33,7 @@ generer_affichage: affichage.o arbres.o
 
 # Ici, on utilise l'"intelligence" de 'make' qui saura tout seul
 # comment créer les .o à partir des .c
-main: main.o arbresphylo.o arbres.o listes.o affichage.o
+main: main.o arbresphylo.o arbres.o listes.o affichage.o file.o
 
 clean:
 	rm -f main *.o acte1 acte2 acte3 acte3b acte4 acte5 dot generer_affichage affichage

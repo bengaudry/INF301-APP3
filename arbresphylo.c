@@ -2,6 +2,7 @@
 #include "arbres.h"
 #include "affichage.h"
 #include "listes.h"
+#include "file.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -150,69 +151,6 @@ int ajouter_espece(arbre *a, char *espece, cellule_t *seq) {
 }
 
 
-typedef struct {
-	bool est_fin_ligne;
-	arbre *a;
-} cellule_file_val;
-
-typedef struct cellule_file_s {
-	cellule_file_val* val;
-	struct cellule_file_s* suivant;
-} cellule_file;
-
-typedef struct file_s {
-	cellule_file* tete;
-	cellule_file* queue;
-	int longueur;
-} file;
-
-
-file* init_file(void) {
-	file *file;
-
-	file = malloc(sizeof(file));
-	file->queue = NULL;
-	file->tete = NULL;
-	file->longueur = 0;
-	return file;
-}
-
-void file_append(file* f, arbre *a) {
-	cellule_file *cel;
-	cellule_file_val *val;
-
-
-	cel = malloc(sizeof(cellule_file));
-	val = malloc(sizeof(cellule_file_val));
-	val->est_fin_ligne = (a == NULL);
-	val->a = a;
-	cel->val = val;
-	cel->suivant = NULL;
-
-	if (f->longueur == 0 || f->tete == NULL || f->queue == NULL) {
-		f->tete = cel;
-		f->queue = cel;
-		f->longueur = 1;
-		return;
-	}
-	
-	f->queue->suivant = cel;
-	f->queue = cel;
-	f->longueur = f->longueur + 1;
-	return;
-}
-
-cellule_file_val* file_pop(file* f) {
-	cellule_file_val* v;
-	
-	v = f->tete->val;
-	f->longueur = f->longueur - 1;
-	f->tete = f->tete->suivant;
-	if (f->tete == NULL) f->queue = NULL;
-	return v;
-}
-
-
 /* Doit afficher la liste des caractéristiques niveau par niveau, de gauche
  * à droite, dans le fichier fout.
  * Appeler la fonction avec fout=stdin pour afficher sur la sortie standard.
@@ -250,7 +188,7 @@ void afficher_par_niveau(arbre racine, FILE *fout)
 	}
 }
 
-// Acte 4
+/* ACTE IV */
 
 int ajouter_carac(arbre *a, char *carac, cellule_t *seq)
 {
