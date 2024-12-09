@@ -27,6 +27,8 @@ acte3: acte3.o $(OBJS)
 acte3b: acte3b.o $(OBJS)
 acte4: acte4.o $(OBJS)
 
+exercice_secret: exercice_secret.c client.o
+
 generer_affichage: affichage.o arbres.o
 
 .PHONY: tests_acte1 tests_acte2 tests_acte3 tests_acte3b tests_acte4
@@ -36,4 +38,4 @@ generer_affichage: affichage.o arbres.o
 main: main.o arbresphylo.o arbres.o listes.o affichage.o file.o
 
 clean:
-	rm -f main *.o acte1 acte2 acte3 acte3b acte4 acte5 dot generer_affichage affichage
+	rm -f main *.o acte1 acte2 acte3 acte3b acte4 acte5 dot generer_affichage affichage exercice_secret
