@@ -13,7 +13,7 @@ then
     exit 0
 fi
 
-if [ "$1" = "--clear" ]
+if [ "$1" = "--clean" ]
 then 
     rm *.dot *.png
     exit 0

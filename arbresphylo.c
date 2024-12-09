@@ -11,12 +11,20 @@
 
 #define DEBUG true
 
+
+/// FONCTIONS UTILES ///
+bool est_feuille(arbre a) {
+	if (a == NULL) return false;
+	return a->gauche == NULL && a->droit == NULL;
+}
+
+
 /* ACTE I */
 
 void analyse_arbre_rec(arbre a, int *nb_esp, int *nb_carac)
 {
 	if (a == NULL) return;
-	if (a->gauche == NULL && a->droit == NULL)
+	if (est_feuille(a))
 	{
 		(*nb_esp)++;
 		return;
@@ -47,7 +55,7 @@ int rechercher_espece(arbre racine, char *espece, liste_t *seq)
 	if (racine == NULL) return 1;
 
 	// Si on est sur une feuille, on compare la valeur de la feuille avec l'espèce recherchée
-	if (racine->gauche == NULL && racine->droit == NULL)
+	if (est_feuille(racine))
 		return strcmp(racine->valeur, espece);
 		
 	// On recherche récursivement dans les branches gauches et droites
@@ -67,7 +75,7 @@ int rechercher_espece(arbre racine, char *espece, liste_t *seq)
 }
 
 
-/* Acte 3 */
+/* Acte III */
 
 /* Renvoie true si la caractéristique cherchée existe dans une branche de l'arbre.
  * 
@@ -104,7 +112,7 @@ int ajouter_espece_rec(arbre *a, char *espece, cellule_t *cel) {
 	}
 
 	if (cel == NULL) {
-		if ((*a)->gauche == NULL && (*a)->droit == NULL) return 1;
+		if (est_feuille(*a)) return 1;
 		return ajouter_espece_rec(&(*a)->gauche, espece, cel);
 	}
 
@@ -141,18 +149,69 @@ int ajouter_espece(arbre *a, char *espece, cellule_t *seq) {
 	return r;
 }
 
-void afficher_seq(cellule_t *seq) {
-	cellule_t *seq_init = seq;
 
-	printf("SEQ : \n");
-	while(seq != NULL) {
-		printf("%s\n", seq->val);
-		seq = seq->suivant;
-	}
-	printf("FIN SEQ\n");
+typedef struct {
+	bool est_fin_ligne;
+	arbre *a;
+} cellule_file_val;
 
-	seq = seq_init;
+typedef struct cellule_file_s {
+	cellule_file_val* val;
+	struct cellule_file_s* suivant;
+} cellule_file;
+
+typedef struct file_s {
+	cellule_file* tete;
+	cellule_file* queue;
+	int longueur;
+} file;
+
+
+file* init_file(void) {
+	file *file;
+
+	file = malloc(sizeof(file));
+	file->queue = NULL;
+	file->tete = NULL;
+	file->longueur = 0;
+	return file;
 }
+
+void file_append(file* f, arbre *a) {
+	cellule_file *cel;
+	cellule_file_val *val;
+
+
+	cel = malloc(sizeof(cellule_file));
+	val = malloc(sizeof(cellule_file_val));
+	val->est_fin_ligne = (a == NULL);
+	val->a = a;
+	cel->val = val;
+	cel->suivant = NULL;
+
+	if (f->longueur == 0 || f->tete == NULL || f->queue == NULL) {
+		f->tete = cel;
+		f->queue = cel;
+		f->longueur = 1;
+		return;
+	}
+	
+	f->queue->suivant = cel;
+	f->queue = cel;
+	f->longueur = f->longueur + 1;
+	return;
+}
+
+cellule_file_val* file_pop(file* f) {
+	cellule_file_val* v;
+	
+	v = f->tete->val;
+	f->longueur = f->longueur - 1;
+	f->tete = f->tete->suivant;
+	if (f->tete == NULL) f->queue = NULL;
+	return v;
+}
+
 
 /* Doit afficher la liste des caractéristiques niveau par niveau, de gauche
  * à droite, dans le fichier fout.
@@ -160,8 +219,35 @@ void afficher_seq(cellule_t *seq) {
  */
 void afficher_par_niveau(arbre racine, FILE *fout)
 {
-	printf("<<<<< À faire: fonction afficher_par_niveau fichier " __FILE__
-		   " >>>>>\n");
+	file *f;
+	cellule_file_val *v;
+	noeud *n;
+
+	f = init_file();
+	file_append(f, &racine);
+	file_append(f, NULL);
+
+	while (f->longueur > 0) {
+		v = file_pop(f);
+		// Si le noeud est NULL, on termine un niveau
+		if (v->est_fin_ligne) {
+			fprintf(fout, "\n");
+			if (f->longueur > 0) file_append(f, NULL);
+			continue;
+		}
+		n = *v->a;
+		if (n == NULL) continue;
+		if (!est_feuille(n)) {
+			fprintf(fout, "%s ", n ? n->valeur : "NULL");
+		}
+
+		if (n->gauche != NULL) {
+			file_append(f, &n->gauche);
+		}
+		if (n->droit != NULL) {
+			file_append(f, &n->droit);
+		}
+	}
 }
 
 // Acte 4

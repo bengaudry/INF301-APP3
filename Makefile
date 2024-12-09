@@ -33,7 +33,7 @@ generer_affichage: affichage.o arbres.o
 
 # Ici, on utilise l'"intelligence" de 'make' qui saura tout seul
 # comment créer les .o à partir des .c
-main: main.o arbresphylo.o arbres.o listes.o
+main: main.o arbresphylo.o arbres.o listes.o affichage.o
 
 clean:
 	rm -f main *.o acte1 acte2 acte3 acte3b acte4 acte5 dot generer_affichage affichage
