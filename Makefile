@@ -27,7 +27,7 @@ acte3: acte3.o $(OBJS)
 acte3b: acte3b.o $(OBJS)
 acte4: acte4.o $(OBJS)
 
-exercice_secret: exercice_secret.c client.o
+exercice_secret: exercice_secret.c $(OBJS) client.o
 
 generer_affichage: affichage.o arbres.o
 

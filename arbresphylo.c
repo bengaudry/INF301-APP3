@@ -21,7 +21,6 @@ bool est_feuille(arbre a) {
 
 
 /* ACTE I */
-
 void analyse_arbre_rec(arbre a, int *nb_esp, int *nb_carac)
 {
 	if (a == NULL) return;
@@ -36,6 +35,9 @@ void analyse_arbre_rec(arbre a, int *nb_esp, int *nb_carac)
 	analyse_arbre_rec(a->droit, nb_esp, nb_carac);
 }
 
+/* Parcours en profondeur préfixe de l'arbre
+ * Complexité : O(n)
+ */
 void analyse_arbre(arbre racine, int *nb_esp, int *nb_carac)
 {
 	*nb_esp = 0;
@@ -47,6 +49,7 @@ void analyse_arbre(arbre racine, int *nb_esp, int *nb_carac)
 
 /* Recherche l'espece dans l'arbre. Modifie la liste passée en paramètre pour y
  * mettre les caractéristiques. Retourne 0 si l'espèce a été retrouvée, 1 sinon.
+ * Complexité : O(h)
  */
 int rechercher_espece(arbre racine, char *espece, liste_t *seq)
 {
@@ -79,7 +82,7 @@ int rechercher_espece(arbre racine, char *espece, liste_t *seq)
 /* Acte III */
 
 /* Renvoie true si la caractéristique cherchée existe dans une branche de l'arbre.
- * 
+ * Complexité : O(h)
  */
 bool carac_existe(arbre *a, char *carac, arbre *a_carac) {
 	if ((*a) == NULL) return false;
@@ -90,6 +93,7 @@ bool carac_existe(arbre *a, char *carac, arbre *a_carac) {
 
 /* Doit renvoyer 0 si l'espece a bien ete ajoutee, 1 sinon, et ecrire un
  * message d'erreur.
+ * Complexité : O(h²)
  */
 int ajouter_espece_rec(arbre *a, char *espece, cellule_t *cel) {
 	noeud *n;
@@ -190,8 +194,58 @@ void afficher_par_niveau(arbre racine, FILE *fout)
 
 /* ACTE IV */
 
+void afficher_seq(cellule_t* tete) {
+	cellule_t* cel;
+
+	cel = tete;
+	printf("SEQ \n");
+	while (cel != NULL) {
+		printf("%s\n", cel->val);
+		cel = cel->suivant;
+	}
+	printf("FIN SEQ\n");
+}
+
+/* Supprime une espèce d'une séquence */
+void supprimer_espece_seq(char* espece, cellule_t* tete) {
+	cellule_t *cel, *cel_p;
+
+	cel = tete;
+	cel_p = tete;
+	while (cel != NULL) {
+		if (strcmp(espece, cel->val) == 0) {
+			if (cel == tete) {
+				cel_p = tete;
+				tete = tete->suivant;
+				free(cel_p);
+				return;
+			}
+			cel_p->suivant = cel->suivant;
+			free(cel);
+			return;
+		}
+		cel_p = cel;
+		cel = cel->suivant;
+	}
+	fprintf(stderr, "L'ESPECE N'A PAS PU ETRE SUPPRIMEE\n\n");
+}
+
+bool existe_clade(arbre *a)  {
+	return false;
+}
+
 int ajouter_carac(arbre *a, char *carac, cellule_t *seq)
 {
-	printf("<<<<< À faire: fonction ajouter_carac fichier " __FILE__ " >>>>>\n");
+	printf("CARAC : %s\n", carac);
+	afficher_seq(seq);
+
+	if (*a == NULL || seq == NULL) {
+		printf("Ne peut ajouter %s: ne forme pas un sous-arbre.", carac);
+		return 0;
+	}
+	
+	supprimer_espece_seq("limace", seq);
+	afficher_seq(seq);
+
 	return 0;
 }
