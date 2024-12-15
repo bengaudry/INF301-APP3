@@ -14,13 +14,20 @@ Nom2 - prénom2 : CORTIAL Remi
 Si vous avez des commentaires, remarques etc. pour le rendu, vous pouvez les 
 mettre ici:
 
+Les exercices cachés d'Appolab sont dans le fichier exercice_secret.c et ont été fait en binôme.
+
 Pour générer un .dot et le png d'un arbre, utiliser 
 ./afficher.sh [-t] <nom_fichier_arbre> <nom_fichier_dest (sans extension)>
 
-Si le fichier .dot a déjà été géneré, utiliser
-./afficher.sh -a [-t] <nom_fichier_dot (sans extension)>
-
 Si le paramètre -t est précisé, le script utilisera twopi au lieu de dot pour générer l'image
+(pour des très grands arbres par exemple).
+
+
+Complexité des scripts :
+- Acte1 : analyse_arbre O(n)
+- Acte2 : rechercher_espece O(h)
+- Acte 3a: ajouter_espece O(h²)
+- Acte 3b: afficher_par_niveau O(n)
 
 
 Travail à effectuer:

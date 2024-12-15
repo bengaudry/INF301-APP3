@@ -222,9 +222,7 @@ int main(int argc, char **argv)
     }
 
     printf("Ajoute %s dans l'arbre %s\n", nom_espece, nom_fichier);
-    int time_start = clock();
     int rep = ajouter_espece(&a, nom_espece, seq.tete) != 0;
-    int time_end = clock();
     if (rep != 0) {
         if (!possible) {
             printf("Impossible d'insérer %s dans %s comme prévu : "
@@ -265,9 +263,6 @@ int main(int argc, char **argv)
         free(esp_car.caracs);
         liberer_liste(&seq);
     }
-
-    printf("\n\n===== TEMPS ECOULE : %d =====\n\n", time_end - time_start);
-
 
     return 0;
 }

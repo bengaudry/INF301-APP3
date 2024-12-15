@@ -18,6 +18,8 @@ int main() {
     }
 
     show_messages(true);
+
+    // EXERCICE 1 //
     connexion("im2ag-appolab.u-ga.fr");
     envoyer("login 12305101 GAUDRY");
 
@@ -34,14 +36,16 @@ int main() {
 
     deconnexion();
 
+
+    // EXERCICE 2 //
+    // http://florent.bouchez.free.fr/protected/INF301/Phylogenetique/hero.php?name=BenRemi&gender=m&page=99999999
     connexion("im2ag-appolab.u-ga.fr");
     envoyer("login 12305101 GAUDRY");
     envoyer("load hero");
     envoyer("start");
-    envoyer("Ben et Termos");
+    envoyer("Ben et Remi");
     envoyer("help");
 
     deconnexion();
-    printf ("Fin de la connection au serveur\n");
     return 0;
 }

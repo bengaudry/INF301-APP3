@@ -95,7 +95,7 @@ bool carac_existe(arbre *a, char *carac, arbre *a_carac) {
  * message d'erreur.
  * Complexité : O(h²)
  */
-int ajouter_espece_rec(arbre *a, char *espece, cellule_t *cel) {
+int ajouter_espece(arbre *a, char *espece, cellule_t *cel) {
 	noeud *n;
 
 	// Arbre vide, on ajoute toutes les caractéristiques puis l'espèce
@@ -113,23 +113,23 @@ int ajouter_espece_rec(arbre *a, char *espece, cellule_t *cel) {
 
 		n->valeur = cel->val;
 		*a = n;
-		return ajouter_espece_rec(&(*a)->droit, espece, cel->suivant);
+		return ajouter_espece(&(*a)->droit, espece, cel->suivant);
 	}
 
 	if (cel == NULL) {
 		if (est_feuille(*a)) return 1;
-		return ajouter_espece_rec(&(*a)->gauche, espece, cel);
+		return ajouter_espece(&(*a)->gauche, espece, cel);
 	}
 
 	// La caractéristique courante existe
 	if (strcmp(cel->val, (*a)->valeur) == 0) {
-		return ajouter_espece_rec(&(*a)->droit, espece, cel->suivant);
+		return ajouter_espece(&(*a)->droit, espece, cel->suivant);
 	}
 
 	if (carac_existe(&(*a)->gauche, cel->val, a)) 
-		return ajouter_espece_rec(&(*a)->gauche, espece, cel);
+		return ajouter_espece(&(*a)->gauche, espece, cel);
 	if (carac_existe(&(*a)->droit, cel->val, a))
-		return ajouter_espece_rec(&(*a)->droit, espece, cel);
+		return ajouter_espece(&(*a)->droit, espece, cel);
 	
 	// La caractéristique courante n'existe pas
 	n = nouveau_noeud();
@@ -137,27 +137,13 @@ int ajouter_espece_rec(arbre *a, char *espece, cellule_t *cel) {
 	n->gauche = *a;
 	n->valeur = cel->val;
 	*a = n;
-	return ajouter_espece_rec(&n->droit, espece, cel->suivant);
+	return ajouter_espece(&n->droit, espece, cel->suivant);
 }
-
-int ajouter_espece(arbre *a, char *espece, cellule_t *seq) {
-	int r;
-	char nom_fichier_dot[1500];
-
-
-	strcat(nom_fichier_dot, espece);
-	strcat(nom_fichier_dot, ".dot");
-
-	r = ajouter_espece_rec(a, espece, seq);
-
-	generer_format_dot(*a, nom_fichier_dot);
-	return r;
-}
-
 
 /* Doit afficher la liste des caractéristiques niveau par niveau, de gauche
  * à droite, dans le fichier fout.
  * Appeler la fonction avec fout=stdin pour afficher sur la sortie standard.
+ * Complexité : O(n)
  */
 void afficher_par_niveau(arbre racine, FILE *fout)
 {
@@ -194,58 +180,108 @@ void afficher_par_niveau(arbre racine, FILE *fout)
 
 /* ACTE IV */
 
-void afficher_seq(cellule_t* tete) {
-	cellule_t* cel;
-
-	cel = tete;
-	printf("SEQ \n");
-	while (cel != NULL) {
-		printf("%s\n", cel->val);
-		cel = cel->suivant;
-	}
-	printf("FIN SEQ\n");
-}
-
-/* Supprime une espèce d'une séquence */
-void supprimer_espece_seq(char* espece, cellule_t* tete) {
+/* Supprime une espèce d'une séquence O(t) (t = taille de la séquence) */
+void supprimer_espece_seq(char* espece, liste_t* l) {
 	cellule_t *cel, *cel_p;
 
-	cel = tete;
-	cel_p = tete;
+	printf("suppresion de %s\n", espece);
+
+	if (l->tete == NULL) return; // liste vide
+
+	if (strcmp(espece, l->tete->val) == 0) {
+		l->tete = l->tete->suivant;
+		return;
+	}
+
+	cel_p = l->tete;
+	cel = l->tete->suivant;
 	while (cel != NULL) {
 		if (strcmp(espece, cel->val) == 0) {
-			if (cel == tete) {
-				cel_p = tete;
-				tete = tete->suivant;
-				free(cel_p);
-				return;
-			}
 			cel_p->suivant = cel->suivant;
-			free(cel);
 			return;
 		}
 		cel_p = cel;
 		cel = cel->suivant;
 	}
-	fprintf(stderr, "L'ESPECE N'A PAS PU ETRE SUPPRIMEE\n\n");
+	return;
 }
 
-bool existe_clade(arbre *a)  {
+
+/* Vérifie si une espèce est présente dans une liste chainée 
+ * Complexité : O(t) (t = taille de la séquence)
+ */
+bool espece_dans_seq(char *espece, liste_t *l) {
+	cellule_t *cel;
+
+	cel = l->tete;
+	while (cel != NULL) {
+		if (strcmp(cel->val, espece) == 0) return true;
+		cel = cel->suivant;
+	}
 	return false;
 }
 
-int ajouter_carac(arbre *a, char *carac, cellule_t *seq)
+/* 0: pas de clade
+ * 1: un clade existe
+ * 2: une partie du clade existe
+ */
+int ajouter_carac_rec(arbre *a, char *carac, liste_t* seq)
 {
-	printf("CARAC : %s\n", carac);
-	afficher_seq(seq);
+	int rg, rd;
+	printf("\nnoeud : %s\n", (*a)->valeur);
+	afficher_liste(seq);
 
 	if (*a == NULL || seq == NULL) {
 		printf("Ne peut ajouter %s: ne forme pas un sous-arbre.", carac);
 		return 0;
 	}
-	
-	supprimer_espece_seq("limace", seq);
-	afficher_seq(seq);
+
+	if (est_feuille(*a)) {
+		if (espece_dans_seq((*a)->valeur, seq)) {
+			supprimer_espece_seq((*a)->valeur, seq);
+			afficher_liste(seq);
+			return 2;
+		}
+		printf("espece pas dans seq\n");
+		return 0;
+	}
+
+	rg = ajouter_carac_rec(&(*a)->gauche, carac, seq);
+	rd = ajouter_carac_rec(&(*a)->droit, carac, seq);
+
+	if (rg == 2 && rd == 2) {
+		// Sous arbre trouvé
+		printf("\n\n%s\n", (*a)->valeur);
+		afficher_liste(seq);
+		if (seq->tete == NULL && !est_feuille(*a)) {
+			printf("SOUS ARBRE TROUVE\n");
+			noeud *n = nouveau_noeud();
+			n->valeur = carac;
+			n->gauche = NULL;
+			n->droit = *a;
+			*a = n;
+			return 1;
+		}
+		return 2;
+	}
 
 	return 0;
+}
+
+int ajouter_carac(arbre *a, char *carac, cellule_t *seq)
+{
+	int r;
+	char nom_fichier_dot[1500];
+	liste_t l;
+
+	l.tete = seq;
+
+	strcat(nom_fichier_dot, carac);
+	strcat(nom_fichier_dot, ".dot");
+
+	r = ajouter_carac_rec(a, carac, &l);
+	printf("\nRETOUR : %d\n", r);
+
+	generer_format_dot(*a, nom_fichier_dot);
+	return r;
 }
